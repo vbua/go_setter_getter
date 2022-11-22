@@ -1,0 +1,9 @@
+version: "3.9"
+services:
+  nats-streaming:
+    image: "nats-streaming:0.24.6"
+    command:
+      - "--cluster_id"
+      - "user_grades_cluster"
+    ports:
+      - "4222:4222"
