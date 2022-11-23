@@ -16,22 +16,24 @@ type UserGradeSetterService interface {
 }
 
 type NatsSubscriber struct {
+	sc               stan.Conn
 	userGradeService UserGradeSetterService
+	sub              stan.Subscription
 }
 
 func NewNatsSubscriber(userGradeService UserGradeSetterService) NatsSubscriber {
-	return NatsSubscriber{userGradeService}
-}
-
-func (n *NatsSubscriber) SubscribeToNats(parseTime time.Time) {
 	sc, err := stan.Connect(config.NatsClusterId, config.NatsSubscriberClientId)
 	if err != nil {
 		log.Fatalln("Couldn't connect: ", err.Error())
 	}
+	return NatsSubscriber{sc, userGradeService, nil}
+}
+
+func (n *NatsSubscriber) SubscribeToNats(parseTime time.Time) {
 	if parseTime.IsZero() {
 		parseTime = time.Now()
 	}
-	_, err = sc.Subscribe(config.NatsTopic, func(m *stan.Msg) {
+	sub, err := n.sc.Subscribe(config.NatsTopic, func(m *stan.Msg) {
 		fmt.Printf("Received a message: %s\n", string(m.Data))
 
 		data := struct {
@@ -51,4 +53,11 @@ func (n *NatsSubscriber) SubscribeToNats(parseTime time.Time) {
 	if err != nil {
 		log.Fatalln("Couldn't subscribe: ", err.Error())
 	}
+
+	n.sub = sub
+}
+
+func (n *NatsSubscriber) Stop() {
+	n.sub.Unsubscribe()
+	n.sc.Close()
 }
