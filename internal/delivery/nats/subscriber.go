@@ -8,6 +8,7 @@ import (
 	"github.com/vbua/go_setter_getter/internal/entity"
 	"log"
 	"os"
+	"time"
 )
 
 type UserGradeSetterService interface {
@@ -22,13 +23,14 @@ func NewNatsSubscriber(userGradeService UserGradeSetterService) NatsSubscriber {
 	return NatsSubscriber{userGradeService}
 }
 
-func (n *NatsSubscriber) SubscribeToNats() {
+func (n *NatsSubscriber) SubscribeToNats(parseTime time.Time) {
 	sc, err := stan.Connect(config.NatsClusterId, config.NatsSubscriberClientId)
 	if err != nil {
 		log.Fatalln("Couldn't connect: ", err.Error())
 	}
-
-	//var startTime time.Time
+	if parseTime.IsZero() {
+		parseTime = time.Now()
+	}
 	_, err = sc.Subscribe(config.NatsTopic, func(m *stan.Msg) {
 		fmt.Printf("Received a message: %s\n", string(m.Data))
 
@@ -44,7 +46,7 @@ func (n *NatsSubscriber) SubscribeToNats() {
 		if data.ReplicaId != os.Getenv("REPLICA_ID") {
 			n.userGradeService.Set(data.UserGrade, false)
 		}
-	})
+	}, stan.StartAtTime(parseTime))
 
 	if err != nil {
 		log.Fatalln("Couldn't subscribe: ", err.Error())

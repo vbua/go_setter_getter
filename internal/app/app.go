@@ -22,7 +22,7 @@ func Run() {
 
 	backupReader := backup_reader.NewBackupReader(&userGradeService)
 	fmt.Println("Заполняю хранилище с бэкапа")
-	backupReader.ReadFromBackup()
+	parseTime := backupReader.ReadFromBackup()
 	// только после заполнения стораджа идем дальше
 
 	go func() {
@@ -40,7 +40,7 @@ func Run() {
 	go func() {
 		fmt.Println("Запускаю подписчика к натс стриминг")
 		natsSubscriber := nats.NewNatsSubscriber(&userGradeService)
-		natsSubscriber.SubscribeToNats()
+		natsSubscriber.SubscribeToNats(parseTime)
 	}()
 	<-wait
 }

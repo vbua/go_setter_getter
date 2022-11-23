@@ -49,9 +49,9 @@ func (h *GetterHandler) get(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *GetterHandler) backup(w http.ResponseWriter, r *http.Request) {
-	const layout = "01-02-2006"
+	const layout = "01-02-2006 15:04:05"
 	t := time.Now()
-	w.Header().Set("Content-Disposition", "attachment; filename=backup"+t.Format(layout)+".csv.gz")
+	w.Header().Set("Content-Disposition", `attachment; filename="`+t.Format(layout)+`.csv.gz"`)
 	var buf bytes.Buffer
 	userGrades := h.userGradeService.Backup()
 	zipWriter := gzip.NewWriter(&buf)
