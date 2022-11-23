@@ -49,3 +49,13 @@ func (u *UserGradeRepo) Get(userId string) (*entity.UserGrade, error) {
 	}
 	return &userGrade, nil
 }
+
+func (u *UserGradeRepo) GetAll() map[string]entity.UserGrade {
+	return u.userGrades
+}
+
+func (u *UserGradeRepo) SetMany(userGrades map[string]entity.UserGrade) {
+	u.Lock()
+	u.userGrades = userGrades
+	u.Unlock()
+}

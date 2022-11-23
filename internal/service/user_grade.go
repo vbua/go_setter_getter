@@ -7,6 +7,8 @@ import (
 type UserGradeRepo interface {
 	Set(entity.UserGrade)
 	Get(userId string) (*entity.UserGrade, error)
+	GetAll() map[string]entity.UserGrade
+	SetMany(map[string]entity.UserGrade)
 }
 
 type UserGradeNatsRepo interface {
@@ -22,9 +24,11 @@ func NewUserGradeService(userGradeRepo UserGradeRepo, userGradeNatsRepo UserGrad
 	return UserGradeService{userGradeRepo, userGradeNatsRepo}
 }
 
-func (u *UserGradeService) Set(userGrade entity.UserGrade) {
+func (u *UserGradeService) Set(userGrade entity.UserGrade, needPublish bool) {
 	u.userGradeRepo.Set(userGrade)
-	u.userGradeNatsRepo.Publish(userGrade)
+	if needPublish {
+		u.userGradeNatsRepo.Publish(userGrade)
+	}
 }
 
 func (u *UserGradeService) Get(userId string) (*entity.UserGrade, error) {
@@ -33,4 +37,13 @@ func (u *UserGradeService) Get(userId string) (*entity.UserGrade, error) {
 		return nil, err
 	}
 	return userGrade, nil
+}
+
+func (u *UserGradeService) Backup() map[string]entity.UserGrade {
+	userGrades := u.userGradeRepo.GetAll()
+	return userGrades
+}
+
+func (u *UserGradeService) SetMany(userGrades map[string]entity.UserGrade) {
+	u.userGradeRepo.SetMany(userGrades)
 }

@@ -7,3 +7,5 @@ services:
       - "user_grades_cluster"
     ports:
       - "4222:4222"
+      - "8223:8223"
+

@@ -9,7 +9,7 @@ import (
 )
 
 type UserGradeSetterService interface {
-	Set(entity.UserGrade)
+	Set(entity.UserGrade, bool)
 }
 
 type SetterHandler struct {
@@ -41,6 +41,6 @@ func (h *SetterHandler) set(w http.ResponseWriter, r *http.Request) {
 		sendResponse(true, err.Error(), http.StatusBadRequest, w)
 		return
 	}
-	h.userGradeService.Set(userGrade)
+	h.userGradeService.Set(userGrade, true)
 	sendResponse(false, "User grade created successfully", http.StatusOK, w)
 }

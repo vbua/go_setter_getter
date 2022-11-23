@@ -11,7 +11,7 @@ import (
 )
 
 type UserGradeSetterService interface {
-	Set(entity.UserGrade)
+	Set(entity.UserGrade, bool)
 }
 
 type NatsSubscriber struct {
@@ -28,6 +28,7 @@ func (n *NatsSubscriber) SubscribeToNats() {
 		log.Fatalln("Couldn't connect: ", err.Error())
 	}
 
+	//var startTime time.Time
 	_, err = sc.Subscribe(config.NatsTopic, func(m *stan.Msg) {
 		fmt.Printf("Received a message: %s\n", string(m.Data))
 
@@ -41,7 +42,7 @@ func (n *NatsSubscriber) SubscribeToNats() {
 		}
 		// фильтруем свои сообщения с той же реплики, иначе попадем в зацикливание
 		if data.ReplicaId != os.Getenv("REPLICA_ID") {
-			n.userGradeService.Set(data.UserGrade)
+			n.userGradeService.Set(data.UserGrade, false)
 		}
 	})
 

@@ -2,9 +2,9 @@ package httpserver
 
 import (
 	"crypto/subtle"
+	"github.com/vbua/go_setter_getter/config"
 	"log"
 	"net/http"
-	"os"
 	"time"
 )
 
@@ -22,8 +22,8 @@ func basicAuth(next http.Handler) http.Handler {
 
 		user, pass, ok := r.BasicAuth()
 
-		if !ok || subtle.ConstantTimeCompare([]byte(user), []byte(os.Getenv("USER_NAME"))) != 1 ||
-			subtle.ConstantTimeCompare([]byte(pass), []byte(os.Getenv("USER_PASS"))) != 1 {
+		if !ok || subtle.ConstantTimeCompare([]byte(user), []byte(config.UserName)) != 1 ||
+			subtle.ConstantTimeCompare([]byte(pass), []byte(config.UserPass)) != 1 {
 			w.Header().Set("WWW-Authenticate", "Basic realm=Restricted")
 			w.WriteHeader(401)
 			w.Write([]byte("Unauthorised.\n"))
